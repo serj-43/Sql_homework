@@ -2,6 +2,7 @@ package test;
 
 import com.codeborne.selenide.Selenide;
 import data.DataHelper;
+import lombok.val;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,6 +11,7 @@ import page.LoginPage;
 import sql.DBHelper;
 
 import static com.codeborne.selenide.Selenide.open;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class LoginTest {
 
@@ -21,13 +23,26 @@ public class LoginTest {
     }
 
     @Test
-    void shouldLoginUser() {
-        var authInfo = DataHelper.getAuthInfo();
-        var code = DataHelper.getVerificationCodeFor(authInfo);
+    void shouldLogIn() {
+        val loginPage = new LoginPage();
+        val authInfo = DataHelper.getAuthInfo();
+        val verificationPage = loginPage.validLogin(authInfo);
+        val dashboardPage = verificationPage.validCode(DBHelper.getCode());
+    }
 
-        var loginPage = new LoginPage();
-        var verificationPage = loginPage.validLogin(authInfo);
-        var dashBoardPage = verificationPage.validCode(code);
+    @Test
+        void shouldGetBlock() {
+        val loginPage = new LoginPage();
+        val authInfo = DataHelper.getAuthInfoWithInvalid();
+        loginPage.login(authInfo);
+        loginPage.getInvalidLoginOrPassword();
+        loginPage.cleaning();
+        loginPage.login(authInfo);
+        loginPage.getInvalidLoginOrPassword();
+        loginPage.cleaning();
+        loginPage.login(authInfo);
+        val status = DBHelper.getUserStatus(authInfo.getLogin());
+        assertEquals("blocked", status);
     }
 
     @AfterAll

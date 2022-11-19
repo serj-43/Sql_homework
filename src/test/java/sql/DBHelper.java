@@ -2,6 +2,7 @@ package sql;
 
 import lombok.val;
 import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -15,16 +16,14 @@ public class DBHelper {
         return connection;
     }
 
-    public static void clean(){
+    public static void clean() {
         val runner = new QueryRunner();
         val cleanUsers = "DELETE FROM users;";
         val cleanCards = "DELETE FROM cards;";
         val cleanAuth_Codes = "DELETE FROM auth_codes;";
         val cleanCard_Transactions = "DELETE FROM card_transactions;";
         try (
-                val conn = DriverManager.getConnection(
-                        "jdbc:mysql://localhost:3306/app", "app", "pass"
-                )
+                val conn = getConnection();
         ) {
             runner.execute(conn, cleanCards);
             runner.execute(conn, cleanAuth_Codes);
@@ -47,5 +46,20 @@ public class DBHelper {
             err.printStackTrace();
         }
         return null;
+    }
+
+    public static String getUserStatus(String login) {
+        val selectSQL = "SELECT status FROM users WHERE login = ?;";
+        val runner = new QueryRunner();
+        String status = null;
+
+        try (
+                val conn = getConnection();
+        ) {
+            status = runner.query(conn, selectSQL, new ScalarHandler<>(), login);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return status;
     }
 }

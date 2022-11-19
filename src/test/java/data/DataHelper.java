@@ -22,9 +22,7 @@ public class DataHelper {
         private String code;
     }
 
-    public static VerificationCode getVerificationCodeFor(AuthInfo authInfo) {
-        return new VerificationCode("12345");
+    public static AuthInfo getAuthInfoWithInvalid() {
+        return new AuthInfo("vasya", "123456");
     }
-
-
 }
